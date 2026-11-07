@@ -1,0 +1,40 @@
+diff --git a/soc/sun252iw1/app_efex/c907_boot/main.c b/soc/sun252iw1/app_efex/c907_boot/main.c
+index 86fbc59..eed1f6b
+--- a/soc/sun252iw1/app_efex/c907_boot/main.c
++++ b/soc/sun252iw1/app_efex/c907_boot/main.c
+@@ -33,6 +33,19 @@
+ #define C907_CORE_CFG   (RISCV_CFG_BASE + 0x108)
+ #define C907_RESET_ENT  (RISCV_CFG_BASE + 0x100)
+ 
++/*
++ * Co-exist shared slot: top window of the 128 MiB DRAM at 0x40000000.
++ *   +0x0 u32 magic (0xE907C001)
++ *   +0x4 u32 seq   (incremented by the writer)
++ *   +0x8 u32 ack   (peer acknowledgement, reserved)
++ *   +0xc..0x3f      reserved / padding
++ * The low 8 KiB of DRAM belongs to smp_test_fel.bin@0x40000000 -- never touch.
++ */
++#define COEXIST_SLOT        0x47FFF000U
++#define COEXIST_SLOT_MAGIC  0xE907C001U
++#define COEXIST_SLOT_SEQ    (COEXIST_SLOT + 0x4U)
++#define COEXIST_SLOT_ACK    (COEXIST_SLOT + 0x8U)
++
+ static const sunxi_serial_t console = {
+ 	.base = SUNXI_UART0_BASE,
+ 	.id = 0,
+@@ -97,10 +110,11 @@ int main(void)
+ 	fence_io();
+ 	writel(readl(CCU_RESET_CFG) | 0x16aa0020U, CCU_RESET_CFG);
+ 
+-	/* light sleep, the C907 owns the system from here */
+-	__asm__ volatile("csrrc zero, mexstatus, %0" ::"r"(0xc));
+-	__asm__ volatile("csrrs zero, mexstatus, %0" ::"r"(0x4));
++	/* Co-exist slot: magic 0xE907C001 + seq at 0x47FFF000 in DRAM.
++	   Write magic and seq, then busy-idle (no WFI, no UART0 touch). */
++	writel(COEXIST_SLOT_MAGIC, COEXIST_SLOT + 0x0U);
++	writel(1U, COEXIST_SLOT + 0x4U);
+ 	for (;;) {
+-		__asm__ volatile("wfi");
++		__asm__ volatile("pause");
+ 	}
+ }

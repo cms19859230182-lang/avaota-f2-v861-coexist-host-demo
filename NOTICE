@@ -1,0 +1,30 @@
+NOTICE — 档 B 个人板仓 · Avaota F2 / V861-V881 共存 HOST 产物包
+================================================================
+
+本包以「HOST 侧复现证据」为主：预编译 bin、SHA、diff、说明文档。
+它**不包含**对 SyterKit 的重新实现，也不是 RT-Thread 的板级 BSP。
+
+1. 许可证
+   - 本包文档与我方脚本：与上游 SyterKit 保持一致（GPL-2.0），除非文件头另有说明。
+   - SyterKit 源码／构建脚本：GPL-2.0，见 https://github.com/YuzukiHD/SyterKit
+   - 硬件设计源文件（AvaotaSBC/AvaotaF2）：CC0。
+   - 上游作者致谢：BernardXiong（YuzukiHD）。
+
+2. 二进制 stub（重要）
+   - `bins/c907_boot_coexist_efex.bin`、`bins/e907_hello_coexist.bin` 是**基于**
+     SyterKit 官方构建链派生／fork 出来的我方产物（尾部共存心跳改动），
+     **不是**上游原始镜像，也**不代表**上游认可。
+   - stock 参考副本 `init_dram_efex.bin`、`c907_boot_efex.bin`、`smp_test_fel.bin`
+     来自 SyterKit 官方构建产物（原样转存，未改动；来源 `../stock-fullcopy/bins/`）。
+   - `init_dram` 链路可能包含**闭源** DRAM 初始化目标文件（SyterKit 树内的
+     `libdram-*.a`）。按 GPL-2.0 再分发时，请同时提供获取对应源码的方式，
+     并明确标注哪些部分没有源码。
+   - 各 bin 的 SHA256 见 `README.md` 与 `bins/SHA256SUMS.*.txt`；上板前请自行校验。
+
+3. 无担保
+   FEL 上板有风险（改内存／误导启动）。本包内容按原样提供，无任何担保；
+   操作前请自行确认板型、芯片 ID 与串口。本包**未做** FEL，**无**真板共存证据。
+
+4. 第三方名称
+   Avaota F2、AvaotaSBC、Allwinner、XuanTie、SyterKit、RT-Thread 等名称归各自权利人所有，
+   此处仅作描述性引用。
